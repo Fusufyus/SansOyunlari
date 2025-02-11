@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zorlu Labirent Oyunu</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        canvas {
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="mazeCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById("mazeCanvas");
+        const ctx = canvas.getContext("2d");
+        const cols = 51, rows = 51;
+        const cellSize = 12;
+        canvas.width = cols * cellSize;
+        canvas.height = rows * cellSize;
+        
+        let maze = Array.from({ length: rows }, () => Array(cols).fill(1));
+        let player = { x: 1, y: 1 };
+        
+        // Labirenti rastgele yollarla oluştur
+        function generateMaze(x, y) {
+            maze[y][x] = 0;
+            let directions = [
+                [0, -2], [0, 2], [-2, 0], [2, 0] // Yönler: yukarı, aşağı, sola, sağa
+            ].sort(() => Math.random() - 0.5); // Yönleri rastgele sırala
+            
+            directions.forEach(([dx, dy]) => {
+                let nx = x + dx, ny = y + dy;
+                if (nx > 0 && ny > 0 && nx < cols - 1 && ny < rows - 1 && maze[ny][nx] === 1) {
+                    maze[y + dy / 2][x + dx / 2] = 0; // Duvarları kır
+                    generateMaze(nx, ny); // Yeni geçişi oluştur
+                }
+            });
+        }
+
+        generateMaze(1, 1);
+        
+        // Çıkışı rastgele yerleştir
+        let exit = { x: cols - 2, y: rows - 2 }; // Çıkışı başlangıçta sağ alt köşeye koyuyoruz
+        maze[exit.y][exit.x] = 0; // Çıkış yolu açık
+
+        // Labirenti çiz
+        function drawMaze() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Duvarları ışık alanında göstermek için
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    if (maze[y][x] === 1) {
+                        // Işığın dışında kalan duvarları gizle
+                        const dist = Math.sqrt(Math.pow(player.x - x, 2) + Math.pow(player.y - y, 2));
+                        if (dist <= 6.5) { // Duvarların gösterileceği alanı 6.5 birim olarak ayarladık
+                            ctx.fillStyle = "#222";
+                            ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                        }
+                    }
+                }
+            }
+            
+            // Işık alanı
+            ctx.globalCompositeOperation = "source-over";
+            let gradient = ctx.createRadialGradient(
+                player.x * cellSize + cellSize / 2,
+                player.y * cellSize + cellSize / 2,
+                10,
+                player.x * cellSize + cellSize / 2,
+                player.y * cellSize + cellSize / 2,
+                80 // Işık alanını büyütüyoruz
+            );
+            gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+            gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(
+                player.x * cellSize + cellSize / 2,
+                player.y * cellSize + cellSize / 2,
+                80, 0, Math.PI * 2 // Işık alanını 80 olarak ayarladık
+            );
+            ctx.fill();
+            
+            // Oyuncuyu çiz
+            ctx.fillStyle = "blue";
+            ctx.fillRect(player.x * cellSize, player.y * cellSize, cellSize, cellSize);
+            // Çıkışı çiz
+            ctx.fillStyle = "red";
+            ctx.fillRect(exit.x * cellSize, exit.y * cellSize, cellSize, cellSize);
+        }
+
+        // WASD tuşları için doğru kod
+        document.addEventListener("keydown", (e) => {
+            let { x, y } = player;
+            if (e.key === "w" || e.key === "ArrowUp") {
+                if (maze[y - 1][x] === 0) player.y--;
+            }
+            if (e.key === "s" || e.key === "ArrowDown") {
+                if (maze[y + 1][x] === 0) player.y++;
+            }
+            if (e.key === "a" || e.key === "ArrowLeft") {
+                if (maze[y][x - 1] === 0) player.x--;
+            }
+            if (e.key === "d" || e.key === "ArrowRight") {
+                if (maze[y][x + 1] === 0) player.x++;
+            }
+            drawMaze();
+            // Eğer çıkışı bulursa
+            if (player.x === exit.x && player.y === exit.y) {
+                setTimeout(() => alert("Tebrikler! Zorlu labirenti tamamladın!"), 100);
+                location.reload(); // Yeni bir oyun başlat
+            }
+        });
+        
+        drawMaze();
+    </script>
+</body>
+</html>

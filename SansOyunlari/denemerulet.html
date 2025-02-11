@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>High Stakes Showdown - Rus Ruleti</title>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #2c2c2c;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: #fff;
+      text-align: center;
+    }
+
+    .container {
+      background-color: #333;
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+      width: 350px;
+    }
+
+    h1 {
+      font-size: 30px;
+      margin-bottom: 20px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #4CAF50;
+    }
+
+    .chamber-container {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      margin: 0 auto 30px;
+      background: linear-gradient(145deg, #555, #333);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .chamber {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #ddd;
+      border-radius: 50%;
+      transition: background-color 0.4s ease;
+      top: 50%;
+      left: 50%;
+      transform-origin: center;
+    }
+
+    .chamber.active {
+      background-color: #e74c3c;
+    }
+
+    .btn {
+      padding: 12px 25px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 18px;
+      border: none;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      margin: 10px 0;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background-color: #45a049;
+      transform: scale(1.05);
+    }
+
+    .btn:disabled {
+      background-color: #888;
+      cursor: not-allowed;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #f39c12;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .current-turn {
+      margin-top: 10px;
+      font-size: 20px;
+      font-weight: bold;
+      transition: color 0.4s ease;
+    }
+
+    .player-turn {
+      color: #4CAF50;
+    }
+
+    .ai-turn {
+      color: #FF5722;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .btn:active {
+      animation: pulse 0.5s;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>High Stakes Showdown</h1>
+    <div class="chamber-container" id="chamber-container">
+      <div class="chamber" id="chamber-0" style="transform: rotate(0deg) translateY(-80px);"></div>
+      <div class="chamber" id="chamber-1" style="transform: rotate(60deg) translateY(-80px);"></div>
+      <div class="chamber" id="chamber-2" style="transform: rotate(120deg) translateY(-80px);"></div>
+      <div class="chamber" id="chamber-3" style="transform: rotate(180deg) translateY(-80px);"></div>
+      <div class="chamber" id="chamber-4" style="transform: rotate(240deg) translateY(-80px);"></div>
+      <div class="chamber" id="chamber-5" style="transform: rotate(300deg) translateY(-80px);"></div>
+    </div>
+    <button class="btn" id="spin-button" onclick="spinChamber()">Çevir</button>
+    <button class="btn hidden" id="continue-button" onclick="takeTurn()">Devam Et</button>
+    <div class="result hidden" id="result"></div>
+    <button class="btn hidden" id="reset-button" onclick="resetGame()">Yeni Oyun</button>
+    <div class="current-turn" id="current-turn"></div>
+  </div>
+
+  <script>
+    let gameState = {
+      chambers: [0, 0, 0, 0, 0, 0], // 0 = boş, 1 = mermi
+      currentTurn: 'player',  // Başlangıçta oyuncu oynuyor
+      gameOver: false,
+      winner: null,
+      round: 1,
+      isSpinning: false,
+      playerAlive: true,
+      aiAlive: true
+    };
+
+    function spinChamber() {
+      if (gameState.isSpinning || gameState.gameOver) return;
+
+      gameState.isSpinning = true;
+      updateUI();
+
+      setTimeout(() => {
+        // Rus ruleti odalarını rasgele yerleştir
+        const newChambers = Array(6).fill(0);
+        const targetChamber = Math.floor(Math.random() * 6);
+        newChambers[targetChamber] = 1;
+        gameState.chambers = newChambers;
+
+        gameState.isSpinning = false;
+        updateUI();
+      }, 1000);
+    }
+
+    function takeTurn() {
+      if (gameState.gameOver || gameState.isSpinning) return;
+
+      const currentChamber = gameState.chambers[0];
+      const newChambers = [...gameState.chambers.slice(1), gameState.chambers[0]];
+
+      if (gameState.currentTurn === 'player') {
+        if (currentChamber === 1) {
+          gameState.aiAlive = false;  // AI öldü
+          gameState.winner = 'player';
+        } else {
+          gameState.chambers = newChambers;
+          gameState.currentTurn = 'computer';
+        }
+      } else if (gameState.currentTurn === 'computer') {
+        if (currentChamber === 1) {
+          gameState.playerAlive = false;  // Oyuncu öldü
+          gameState.winner = 'computer';
+        } else {
+          gameState.chambers = newChambers;
+          gameState.currentTurn = 'player';
+        }
+      }
+
+      checkGameOver();
+      updateUI();
+    }
+
+    function checkGameOver() {
+      if (!gameState.playerAlive || !gameState.aiAlive) {
+        gameState.gameOver = true;
+      }
+    }
+
+    function updateUI() {
+      // Oyun durumunu güncelle
+      document.getElementById('result').classList.add('hidden');
+      document.getElementById('continue-button').classList.add('hidden');
+      document.getElementById('reset-button').classList.add('hidden');
+      document.getElementById('spin-button').disabled = gameState.isSpinning;
+
+      // Çemberlerin durumunu güncelle
+      document.querySelectorAll('.chamber').forEach((chamber, index) => {
+        chamber.classList.toggle('active', gameState.chambers[index] === 1);
+      });
+
+      // Geçerli sıralı oyuncuyu göster
+      const currentTurnText = gameState.currentTurn === 'player' ? 'Oyuncu Sırası' : 'Bilgisayar Sırası';
+      document.getElementById('current-turn').textContent = `Şu an: ${currentTurnText}`;
+      document.getElementById('current-turn').className = `current-turn ${gameState.currentTurn === 'player' ? 'player-turn' : 'ai-turn'}`;
+
+      if (gameState.gameOver) {
+        document.getElementById('result').textContent = gameState.winner === 'player' ? 'Kazandınız!' : 'Oyun Bitti!';
+        document.getElementById('result').classList.remove('hidden');
+        document.getElementById('reset-button').classList.remove('hidden');
+      } else {
+        document.getElementById('continue-button').classList.remove('hidden');
+      }
+    }
+
+    function resetGame() {
+      gameState = {
+        chambers: [0, 0, 0, 0, 0, 0],
+        currentTurn: 'player',
+        gameOver: false,
+        winner: null,
+        round: 1,
+        isSpinning: false,
+        playerAlive: true,
+        aiAlive: true
+      };
+      document.getElementById('result').classList.add('hidden');
+      spinChamber();
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şans Oyunları Sitesi</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 2.2em;
+            text-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            padding: 25px;
+            border-radius: 25px;
+            text-shadow: 0 3px 5px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transform: perspective(500px);
+        }
+
+        .button:hover {
+            transform: scale(1.05) rotate(3deg);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+        }
+
+        .button:active {
+            transform: scale(0.95);
+        }
+
+        .blue { background: linear-gradient(135deg, #5f72be, #9b23ea); }
+        .red { background: linear-gradient(135deg, #ff5f6d, #ff3a3a); }
+        .pink { background: linear-gradient(135deg, #ff6b6b, #ff3a3a); }
+        .turquoise { background: linear-gradient(135deg, #20e3b2, #29ffc6); }
+        .green { background: linear-gradient(135deg, #11998e, #38ef7d); }
+
+        .info-btn {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+            color: #6a11cb;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .info-btn:hover {
+            transform: scale(1.1);
+            background: #f0f0f0;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #6a11cb;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.1);
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="back-btn" onclick="window.history.back()">←</div>
+    <h1>BİR NUMARALI KAPSAMLI ŞANS OYUNLARI SİTESİ</h1>
+    <div class="button-container">
+        <div class="button blue" onclick="window.open('Sweet.html', '_blank')">Sweet Fonanda</div>
+        <div class="button blue" onclick="window.open('Katakulli.html', '_blank')">Katakulli</div>
+        <div class="button blue" onclick="window.open('game_37.html', '_blank')">5 Kart</div>
+        <div class="button blue" onclick="window.open('game_49.html', '_blank')">Aritmetik</div>
+        <div class="button red" onclick="window.open('game_58.html', '_blank')">Hafıza</div>
+        <div class="button red" onclick="window.open('denemerulet.html', '_blank')">Rulet</div>
+        <div class="button red" onclick="window.open('game_77.html', '_blank')">Kapsamlı  <br>    VS</div>
+        <div class="button red" onclick="window.open('denemerulet.html', '_blank')">Rus Ruleti</div>
+        <div class="button turquoise" onclick="window.open('elma.html', '_blank')">Altın Yağmuru</div>
+        <div class="button turquoise" onclick="window.open('game_102.html', '_blank')">Hayatta Kalma</div>
+        <div class="button turquoise" onclick="window.open('Maze.html', '_blank')">Karanlık Labirent</div>
+        <div class="button turquoise" onclick="window.open('TASKAGITMAKAS.html', '_blank')">Taş Kağıt Makas</div>
+        <div class="button green" onclick="window.open('game_136.html', '_blank')">Çok Yakında...</div>
+        <div class="button green" onclick="window.open('game_148.html', '_blank')">Çok Yakında...</div>
+        <div class="button green" onclick="window.open('game_159.html', '_blank')">Çok Yakında...</div>
+        <div class="button green" onclick="window.open('game_170.html', '_blank')">Çok Yakında...</div>
+    </div>
+    <div class="info-btn" onclick="window.open('contact.html', '_blank')">?</div>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taş Kağıt Makas Oyunu</title>
+  <style>
+    /* Modern ve dinamik arayüz için temel stiller */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+/* Animasyon tanımlamaları */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes slideIn {
+    0% { transform: translateY(-20px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(255,255,255,0.3); }
+    50% { box-shadow: 0 0 20px rgba(255,255,255,0.6); }
+    100% { box-shadow: 0 0 5px rgba(255,255,255,0.3); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+h1 {
+    font-size: 3.5em;
+    margin-bottom: 40px;
+    background: linear-gradient(45deg, #fff, #64ffda);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: slideIn 1s ease-out;
+}
+
+/* Oyun çizgisi stilleri */
+.game-line {
+    display: flex;
+    gap: 10px;
+    margin: 30px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    width: 80%;
+    max-width: 600px;
+}
+
+.line-section {
+    flex: 1;
+    height: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    transition: all 0.5s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.line-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shine 2s infinite;
+}
+
+/* Buton stilleri */
+button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    margin: 15px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    position: relative;
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+}
+
+button:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+button:hover::before {
+    left: 100%;
+}
+
+/* Skor ve sonuç mesajları */
+#scoreBoard {
+    font-size: 1.5em;
+    margin: 20px 0;
+    padding: 15px 30px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+    animation: pulse 2s infinite;
+}
+
+#resultMessage {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin: 20px 0;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    animation: slideIn 0.5s ease-out;
+}
+
+#finalResultMessage {
+    font-size: 4em;
+    font-weight: 800;
+    margin: 30px 0;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    animation: glow 2s infinite;
+    transition: all 0.5s ease;
+}
+
+/* Renk durumları */
+.line-section.win {
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+.line-section.lose {
+    background: linear-gradient(90deg, #f44336, #d32f2f);
+    box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+}
+
+.line-section.draw {
+    background: linear-gradient(90deg, #ffc107, #ffa000);
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+/* Responsive tasarım */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.5em;
+    }
+    
+    button {
+        padding: 12px 24px;
+        font-size: 1em;
+    }
+    
+    #finalResultMessage {
+        font-size: 3em;
+    }
+}
+
+/* Final sonuç animasyonları */
+.win-animation {
+    animation: 
+        glow 2s infinite,
+        shake 0.5s ease-in-out;
+    color: #4CAF50 !important;
+    text-shadow: 0 0 20px rgba(76, 175, 80, 0.7);
+}
+
+.lose-animation {
+    animation: 
+        glow 2s infinite,
+        shake 0.5s ease-in-out;
+    color: #f44336 !important;
+    text-shadow: 0 0 20px rgba(244, 67, 54, 0.7);
+}
+
+.draw-animation {
+    animation: 
+        glow 2s infinite,
+        shake 0.5s ease-in-out;
+    color: #ffc107 !important;
+    text-shadow: 0 0 20px rgba(255, 193, 7, 0.7);
+}
+  </style>
+</head>
+<body>
+  <h1>Taş Kağıt Makas Oyunu</h1>
+  
+  <div id="gameLine" class="game-line">
+    <div class="line-section"></div>
+    <div class="line-section"></div>
+    <div class="line-section"></div>
+    <div class="line-section"></div>
+    <div class="line-section"></div>
+  </div>
+
+  <div>
+    <button id="tas">Taş</button>
+    <button id="kagit">Kağıt</button>
+    <button id="makas">Makas</button>
+  </div>
+  
+  <div>
+    <p id="resultMessage"></p>
+    <p id="scoreBoard">Skor: Oyuncu: 0 - Bilgisayar: 0</p>
+    <p id="finalResultMessage"></p> <!-- Sonuç mesajı burada gösterilecek -->
+  </div>
+
+  <script>
+    let playerScore = 0;
+    let computerScore = 0;
+    let drawCount = 0;
+    let round = 1;
+    let playerLosses = 0; // Kaybetme sayısını takip ediyoruz
+
+    const resultMessage = document.getElementById("resultMessage"); // Sonuç mesajını göstereceğimiz element
+    const finalResultMessage = document.getElementById("finalResultMessage"); // Final sonucu için yeni element
+    const scoreBoard = document.getElementById("scoreBoard");
+    const gameLine = document.getElementById("gameLine");
+
+    const choices = ["Taş", "Kağıt", "Makas"];
+
+    function getComputerChoice() {
+      const randomIndex = Math.floor(Math.random() * 3);
+      return choices[randomIndex];
+    }
+
+    function playRound(playerChoice) {
+      const computerChoice = getComputerChoice();
+      let result = "";
+
+      if (playerChoice === computerChoice) {
+        result = "Beraberlik!";
+        drawCount++;
+      } else if (
+        (playerChoice === "Taş" && computerChoice === "Makas") ||
+        (playerChoice === "Kağıt" && computerChoice === "Taş") ||
+        (playerChoice === "Makas" && computerChoice === "Kağıt")
+      ) {
+        result = "Kazandınız!";
+        playerScore++;
+      } else {
+        result = "Kaybettiniz!";
+        computerScore++;
+        playerLosses++;
+      }
+
+      updateGameLine(result);
+      displayResult(result);
+      updateScoreBoard();
+      round++;
+      if (round > 5) {
+        endGame();
+      }
+    }
+
+    function updateGameLine(result) {
+      const progress = round - 1;
+      const gameLineSections = gameLine.getElementsByClassName("line-section");
+      
+      if (result === "Kazandınız!") {
+        gameLineSections[progress].style.backgroundColor = "green";
+      } else if (result === "Kaybettiniz!") {
+        gameLineSections[progress].style.backgroundColor = "red";
+      } else if (result === "Beraberlik!") {
+        gameLineSections[progress].style.backgroundColor = "yellow";
+      }
+    }
+
+    function displayResult(result) {
+      resultMessage.innerText = result;
+    }
+
+    function updateScoreBoard() {
+      scoreBoard.innerText = `Skor: Oyuncu: ${playerScore} - Bilgisayar: ${computerScore}`;
+    }
+function updateGameLine(result) {
+    const progress = round - 1;
+    const gameLineSections = gameLine.getElementsByClassName("line-section");
+    
+    // Tüm eski sınıfları temizle
+    gameLineSections[progress].classList.remove('win', 'lose', 'draw');
+    
+    if (result === "Kazandınız!") {
+        gameLineSections[progress].classList.add('win');
+    } else if (result === "Kaybettiniz!") {
+        gameLineSections[progress].classList.add('lose');
+    } else if (result === "Beraberlik!") {
+        gameLineSections[progress].classList.add('draw');
+    }
+}
+
+function endGame() {
+    let finalMessage = "";
+    
+    if (playerLosses >= 3) {
+        finalMessage = "KAYBETTİNİZ!";
+        finalResultMessage.classList.add('lose-animation');
+    } else if (playerScore >= 2 && playerLosses <= 2) {
+        finalMessage = "KAZANDINIZ!";
+        finalResultMessage.classList.add('win-animation');
+    } else if (playerScore === 2 && playerLosses === 2) {
+        finalMessage = "BERABERLİK!";
+        finalResultMessage.classList.add('draw-animation');
+    }
+
+    finalResultMessage.innerText = finalMessage;
+    
+    // Butonları devre dışı bırak
+    document.querySelectorAll('button').forEach(button => {
+        button.disabled = true;
+        button.style.opacity = '0.5';
+    });
+}
+    function endGame() {
+      let finalMessage = "";
+      
+      // Burada sonuçları kontrol ediyoruz
+      if (playerLosses >= 3) {
+        finalMessage = "KAYBETTİNİZ!";
+        finalResultMessage.style.color = "red"; // Kaybettiniz için kırmızı
+      } else if (playerScore >= 2 && playerLosses <= 2) {
+        finalMessage = "KAZANDINIZ!";
+        finalResultMessage.style.color = "green"; // Kazandınız için yeşil
+      } else if (playerScore === 2 && playerLosses === 2) {
+        finalMessage = "BERABERLİK!";
+        finalResultMessage.style.color = "yellow"; // Beraberlik için sarı
+      }
+
+      // Oyun bittiğinde final sonucu yazdırıyoruz
+      finalResultMessage.innerText = finalMessage;
+    }
+
+    // Seçeneklere tıklanabilir işlev ekleyelim
+    document.getElementById("tas").addEventListener("click", function() {
+      playRound("Taş");
+    });
+    document.getElementById("kagit").addEventListener("click", function() {
+      playRound("Kağıt");
+    });
+    document.getElementById("makas").addEventListener("click", function() {
+      playRound("Makas");
+    });
+  </script>
+</body>
+</html>

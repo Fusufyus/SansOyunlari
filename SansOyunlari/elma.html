@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epik Elma Toplama Oyunu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+        }
+
+        canvas {
+            border: 8px solid rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(180deg, #87CEEB 0%, #4A90E2 100%);
+            transition: transform 0.3s;
+        }
+
+        canvas:hover {
+            transform: scale(1.01);
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 600px;
+        }
+
+        .score-board, .time-board {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            position: absolute;
+            transition: transform 0.3s;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .score-board {
+            top: 20px;
+            left: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        .time-board {
+            top: 20px;
+            right: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .power-up {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 15px;
+            color: #333;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            transition: transform 0.5s;
+            z-index: 100;
+            border: 3px solid #fff;
+        }
+
+        .game-over.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .game-over button {
+            background: #4CAF50;
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .game-over button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-ui">
+        <div class="score-board">Skor: 0</div>
+        <div class="time-board">Kalan Süre: 30</div>
+        <div class="power-up" id="powerUpText"></div>
+        <canvas id="gameCanvas" width="500" height="600"></canvas>
+        <div class="game-over" id="gameOver">
+            <h1>Oyun Bitti!</h1>
+            <p>Skorunuz: <span id="finalScore">0</span></p>
+            <button onclick="restartGame()">Tekrar Oyna</button>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const sepetWidth = 80, sepetHeight = 30;
+        let sepetX = canvas.width / 2 - sepetWidth / 2;
+        let sepetSpeed = 5;
+        let sepetVelocity = 0;
+
+        const elmaWidth = 30, elmaHeight = 30;
+        let elmalar = [];
+        let score = 0;
+        let combo = 0;
+        let lastCatchTime = 0;
+
+        const gameTime = 30;
+        let timeLeft = gameTime;
+        let isPowerUpActive = false;
+
+        // Özel elmalar için renkler ve puanlar
+        const elmaTypes = {
+            normal: { color: "#ff0000", points: 1, chance: 0.7 },
+            golden: { color: "#ffd700", points: 3, chance: 0.2 },
+            poison: { color: "#800080", points: -2, chance: 0.1 }
+        };
+
+        function createElma() {
+            const random = Math.random();
+            let type;
+            if (random < elmaTypes.poison.chance) type = "poison";
+            else if (random < elmaTypes.poison.chance + elmaTypes.golden.chance) type = "golden";
+            else type = "normal";
+
+            const x = Math.random() * (canvas.width - elmaWidth);
+            elmalar.push({
+                x: x,
+                y: 0,
+                speed: 2 + Math.random() * 2,
+                type: type,
+                rotation: Math.random() * Math.PI * 2
+            });
+        }
+
+        function drawSepet() {
+            ctx.save();
+            ctx.fillStyle = "#8B4513";
+            ctx.strokeStyle = "#4B0082";
+            ctx.lineWidth = 3;
+            
+            // Sepet gövdesi
+            ctx.beginPath();
+            ctx.moveTo(sepetX, canvas.height - sepetHeight);
+            ctx.bezierCurveTo(
+                sepetX + sepetWidth * 0.3, canvas.height - sepetHeight - 10,
+                sepetX + sepetWidth * 0.7, canvas.height - sepetHeight - 10,
+                sepetX + sepetWidth, canvas.height - sepetHeight
+            );
+            ctx.lineTo(sepetX + sepetWidth, canvas.height - 5);
+            ctx.lineTo(sepetX, canvas.height - 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Sepet süslemeleri
+            ctx.strokeStyle = "#654321";
+            ctx.beginPath();
+            ctx.moveTo(sepetX, canvas.height - sepetHeight / 2);
+            ctx.lineTo(sepetX + sepetWidth, canvas.height - sepetHeight / 2);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawElma(elma) {
+            ctx.save();
+            ctx.translate(elma.x + elmaWidth / 2, elma.y + elmaHeight / 2);
+            ctx.rotate(elma.rotation);
+            
+            // Elma gövdesi
+            ctx.fillStyle = elmaTypes[elma.type].color;
+            ctx.beginPath();
+            ctx.arc(0, 0, elmaWidth / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Elma sapı
+            ctx.strokeStyle = "#654321";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, -elmaHeight / 2);
+            ctx.lineTo(0, -elmaHeight / 2 - 5);
+            ctx.stroke();
+            
+            // Elma yaprağı
+            ctx.fillStyle = "#228B22";
+            ctx.beginPath();
+            ctx.ellipse(3, -elmaHeight / 2 - 3, 4, 2, Math.PI / 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+
+        function showPowerUp(text) {
+            const powerUpText = document.getElementById("powerUpText");
+            powerUpText.textContent = text;
+            powerUpText.style.opacity = "1";
+            setTimeout(() => {
+                powerUpText.style.opacity = "0";
+            }, 2000);
+        }
+
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Elmaların düşmesi ve çarpışma kontrolü
+            for (let i = 0; i < elmalar.length; i++) {
+                const elma = elmalar[i];
+                elma.y += elma.speed;
+                elma.rotation += 0.02;
+
+                if (elma.y > canvas.height) {
+                    elmalar.splice(i, 1);
+                    i--;
+                    combo = 0;
+                    continue;
+                }
+
+                if (elma.y + elmaHeight >= canvas.height - sepetHeight && 
+                    elma.x + elmaWidth > sepetX && 
+                    elma.x < sepetX + sepetWidth) {
+                    elmalar.splice(i, 1);
+                    i--;
+
+                    const now = Date.now();
+                    if (now - lastCatchTime < 500) combo++;
+                    else combo = 1;
+                    lastCatchTime = now;
+
+                    const points = elmaTypes[elma.type].points * (1 + combo * 0.1);
+                    score += points;
+
+                    if (elma.type === "golden") {
+                        showPowerUp("Altın Elma! +3 Puan!");
+                    } else if (elma.type === "poison") {
+                        showPowerUp("Zehirli Elma! -2 Puan!");
+                    }
+                }
+
+                drawElma(elma);
+            }
+
+            sepetX += sepetVelocity;
+            if (sepetX < 0) sepetX = 0;
+            if (sepetX > canvas.width - sepetWidth) sepetX = canvas.width - sepetWidth;
+
+            drawSepet();
+
+            document.querySelector(".score-board").textContent = `Skor: ${Math.floor(score)} (${combo}x Combo!)`;
+            document.querySelector(".time-board").textContent = `Kalan Süre: ${timeLeft.toFixed(1)}`;
+
+            if (Math.random() < 0.03) createElma();
+        }
+
+        function gameLoop() {
+            update();
+            if (timeLeft > 0) {
+                timeLeft -= 0.01667;
+                requestAnimationFrame(gameLoop);
+            } else {
+                const gameOver = document.getElementById("gameOver");
+                document.getElementById("finalScore").textContent = Math.floor(score);
+                gameOver.classList.add("show");
+            }
+        }
+
+        function restartGame() {
+            score = 0;
+            timeLeft = gameTime;
+            elmalar = [];
+            combo = 0;
+            sepetX = canvas.width / 2 - sepetWidth / 2;
+            document.getElementById("gameOver").classList.remove("show");
+            gameLoop();
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowLeft") sepetVelocity = -sepetSpeed;
+            else if (e.key === "ArrowRight") sepetVelocity = sepetSpeed;
+        });
+
+        document.addEventListener("keyup", (e) => {
+            if (e.key === "ArrowLeft" || e.key === "ArrowRight") sepetVelocity = 0;
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>

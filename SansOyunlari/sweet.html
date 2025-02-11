@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Şeker Patlatma Oyunu</title>
+    <style>
+	@keyframes explode {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+.explosion {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+    animation: explode 0.3s ease-out forwards;
+    pointer-events: none;
+}
+
+/* Oyun sonu ekranı */
+.game-over-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    color: white;
+    text-align: center;
+}
+
+.game-over-screen h2 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.game-over-screen button {
+    padding: 15px 30px;
+    font-size: 20px;
+    background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.game-over-screen button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255,255,255,0.3);
+}
+        /* Temel stil resetlemesi ve animasyon tanımlamaları */
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shine {
+    0% { background-position: -100% 0; }
+    100% { background-position: 100% 0; }
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(255,255,255,0.5); }
+    50% { box-shadow: 0 0 20px rgba(255,255,255,0.8); }
+    100% { box-shadow: 0 0 5px rgba(255,255,255,0.5); }
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    font-family: 'Arial', sans-serif;
+    perspective: 1000px;
+}
+
+.game-container {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+}
+
+.game-container:hover {
+    transform: translateZ(20px);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 15px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.candy {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.candy::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transform: rotate(45deg);
+    animation: shine 3s infinite;
+}
+
+.candy:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+.candy.selected {
+    animation: pop 0.3s ease-in-out;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    transform: scale(0.9);
+}
+
+.candy.special {
+    border: 3px solid gold;
+    animation: glow 2s infinite;
+}
+
+.score, .move-counter {
+    font-size: 28px;
+    margin-bottom: 25px;
+    text-align: center;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    font-weight: bold;
+}
+
+.treasure-box, .multiplier-box {
+    background: linear-gradient(45deg, #ffd700, #ffa500);
+    color: white;
+    padding: 15px;
+    border-radius: 15px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 20px;
+    width: 200px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    animation: float 3s infinite ease-in-out;
+    position: absolute;
+    left: 10px;
+}
+
+.treasure-box {
+    margin-top: 70px;
+}
+
+.multiplier-box {
+    top: 120px;
+    background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+}
+
+.treasure-box:hover, .multiplier-box:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.multiplier-message {
+    font-size: 32px;
+    font-weight: bold;
+    color: #fff;
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(45deg, #00ff87, #60efff);
+    padding: 15px 30px;
+    border-radius: 15px;
+    display: none;
+    z-index: 10;
+    box-shadow: 0 0 30px rgba(0, 255, 135, 0.5);
+    animation: pop 0.5s ease-out;
+}
+
+.payment-info {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    font-size: 18px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px 30px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.payment-info:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-50%) translateY(-5px);
+}
+
+/* Oyun sonu efekti */
+.game-over {
+    animation: fadeOut 1s ease-in-out;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+    </style>
+</head>
+<body>
+<div id="multiplier-message" class="multiplier-message hidden">X1</div>
+
+<div id="multiplier-box" class="multiplier-box">Çarpan Sandığı</div>
+
+<div id="treasure-box" class="treasure-box">Şans Sandığı</div>
+    <div class="game-container">
+        <div class="score">Skor: <span id="score">0</span></div>
+        <div class="move-counter">Hamleler: <span id="moves">10</span></div>
+        <div class="grid" id="grid"></div>
+    </div>
+	<div class="payment-info">
+    Para çekmek, yüklemek için alttaki IBAN'a para at:
+    <br>
+    480001002110000028685254
+</div>
+
+
+    <script>
+        class CandyCrushGame {
+            constructor() {
+			this.activeMultiplier = 1;
+                this.width = 8;
+                this.candyColors = [
+                    '#ff4444', // kırmızı
+                    '#44ff44', // yeşil
+                    '#4444ff', // lacivert
+                    '#ffff44', // sarı
+                    '#ff44ff', // mor
+                    '#44ffff'  // turkuaz
+                ];
+                this.specialCandyColor = '#ffffff'; // Beyaz şeker
+                this.specialCandyChance = 0.02; // %10 ihtimal
+                this.score = 0;
+                this.moves = 10;  // Hamle sayısı
+                this.selectedCandy = null;
+                this.board = [];
+                this.candyTypes = []; // Şekerlerin tipini tutacak array (normal/special)
+                this.isProcessing = false;
+                this.grid = document.getElementById('grid');
+                this.scoreElement = document.getElementById('score');
+                this.movesElement = document.getElementById('moves');
+                this.init();
+            }
+
+            init() {
+                this.createBoard();
+                this.checkAndFillBoard();
+            }
+
+            createBoard() {
+                this.grid.innerHTML = '';
+                this.board = [];
+                this.candyTypes = [];
+                
+                for (let i = 0; i < this.width * this.width; i++) {
+                    const candy = document.createElement('div');
+                    candy.classList.add('candy');
+                    candy.setAttribute('data-id', i);
+                    
+                    let color;
+                    let isSpecial = Math.random() < this.specialCandyChance;
+                    
+                    if (isSpecial) {
+                        color = this.specialCandyColor;
+                        candy.classList.add('special');
+                    } else {
+                        do {
+                            color = this.getRandomColor();
+                        } while (this.wouldCauseMatch(i, color));
+                    }
+                    
+                    candy.style.backgroundColor = color;
+                    this.board.push(color);
+                    this.candyTypes.push(isSpecial ? 'special' : 'normal');
+                    this.grid.appendChild(candy);
+
+                    candy.addEventListener('click', (e) => this.handleCandyClick(e));
+                }
+            }
+
+            getRandomColor() {
+                return this.candyColors[Math.floor(Math.random() * this.candyColors.length)];
+            }
+
+            wouldCauseMatch(index, color) {
+                // Yatay kontrol
+                if (index % this.width >= 2) {
+                    if (this.board[index - 2] === color && this.board[index - 1] === color) {
+                        return true;
+                    }
+                }
+                
+                // Dikey kontrol
+                if (index >= this.width * 2) {
+                    if (this.board[index - this.width * 2] === color && 
+                        this.board[index - this.width] === color) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+
+            async handleCandyClick(e) {
+                if (this.isProcessing || this.moves <= 0) return;
+                
+                const candy = e.target;
+                const index = parseInt(candy.getAttribute('data-id'));
+
+                if (!this.selectedCandy) {
+                    this.selectedCandy = candy;
+                    candy.classList.add('selected');
+                } else {
+                    const selectedIndex = parseInt(this.selectedCandy.getAttribute('data-id'));
+                    
+                    if (selectedIndex === index) {
+                        this.selectedCandy.classList.remove('selected');
+                        this.selectedCandy = null;
+                        return;
+                    }
+
+                    if (this.isValidMove(selectedIndex, index)) {
+                        this.isProcessing = true;
+                        
+                        await this.swapCandies(selectedIndex, index);
+                        
+                        if (!await this.checkAndFillBoard()) {
+                            await this.swapCandies(index, selectedIndex);
+                        }
+                        
+                        this.isProcessing = false;
+                        this.updateMoves();  // Hamleyi azalt
+                    }
+
+                    this.selectedCandy.classList.remove('selected');
+                    this.selectedCandy = null;
+                }
+            }
+
+            updateMoves() {
+                this.moves -= 1;
+                this.movesElement.textContent = `Hamleler: ${this.moves}`;
+                
+                if (this.moves <= 0) {
+                    alert("Oyun Bitti! Hamle sayısı bitti.");
+                    // Oyun bitince durdurma işlemi eklenebilir.
+                }
+            }
+
+            async swapCandies(index1, index2) {
+                return new Promise(resolve => {
+                    const candies = this.grid.children;
+                    
+                    // Renkleri değiştir
+                    const tempColor = this.board[index1];
+                    const tempBgColor = candies[index1].style.backgroundColor;
+                    this.board[index1] = this.board[index2];
+                    candies[index1].style.backgroundColor = candies[index2].style.backgroundColor;
+                    this.board[index2] = tempColor;
+                    candies[index2].style.backgroundColor = tempBgColor;
+                    
+                    // Tipleri değiştir
+                    const tempType = this.candyTypes[index1];
+                    this.candyTypes[index1] = this.candyTypes[index2];
+                    this.candyTypes[index2] = tempType;
+                    
+                    // Special sınıfını güncelle
+                    candies[index1].classList.toggle('special', this.candyTypes[index1] === 'special');
+                    candies[index2].classList.toggle('special', this.candyTypes[index2] === 'special');
+                    
+                    setTimeout(resolve, 200);
+                });
+            }
+
+            findMatches() {
+                const matches = new Set();
+                let includesSpecialCandy = false;
+                
+                // Yatay kontrol
+                for (let row = 0; row < this.width; row++) {
+                    for (let col = 0; col < this.width - 2; col++) {
+                        const index = row * this.width + col;
+                        const colors = [
+                            this.board[index],
+                            this.board[index + 1],
+                            this.board[index + 2]
+                        ];
+                        
+                        // Beyaz şeker kontrolü
+                        const hasSpecial = [
+                            this.candyTypes[index],
+                            this.candyTypes[index + 1],
+                            this.candyTypes[index + 2]
+                        ].includes('special');
+                        
+                        if (this.isValidMatch(colors, hasSpecial)) {
+                            matches.add(index);
+                            matches.add(index + 1);
+                            matches.add(index + 2);
+                            if (hasSpecial) includesSpecialCandy = true;
+                        }
+                    }
+                }
+                
+                // Dikey kontrol
+                for (let col = 0; col < this.width; col++) {
+                    for (let row = 0; row < this.width - 2; row++) {
+                        const index = row * this.width + col;
+                        const colors = [
+                            this.board[index],
+                            this.board[index + this.width],
+                            this.board[index + this.width * 2]
+                        ];
+                        
+                        // Beyaz şeker kontrolü
+                        const hasSpecial = [
+                            this.candyTypes[index],
+                            this.candyTypes[index + this.width],
+                            this.candyTypes[index + this.width * 2]
+                        ].includes('special');
+                        
+                        if (this.isValidMatch(colors, hasSpecial)) {
+                            matches.add(index);
+                            matches.add(index + this.width);
+                            matches.add(index + this.width * 2);
+                            if (hasSpecial) includesSpecialCandy = true;
+                        }
+                    }
+                }
+                
+                // Eğer beyaz şeker kullanıldıysa, tüm lacivert şekerleri ekle
+                if (includesSpecialCandy) {
+                    for (let i = 0; i < this.board.length; i++) {
+                        if (this.board[i] === '#4444ff') { // lacivert renk
+                            matches.add(i);
+                        }
+                    }
+                }
+                
+                if (matches.size > 0) {
+                    this.updateScore(matches.size * 140);
+                    return Array.from(matches);
+                }
+                
+                return false;
+            }
+
+            isValidMatch(colors, hasSpecial) {
+                if (hasSpecial) {
+                    // Beyaz şeker varsa, diğer iki şeker aynı renkte olmalı
+                    const nonSpecialColors = colors.filter(c => c !== this.specialCandyColor);
+                    return nonSpecialColors.length >= 2 && nonSpecialColors[0] === nonSpecialColors[1];
+                } else {
+                    // Normal eşleşme kontrolü
+                    return colors[0] === colors[1] && colors[1] === colors[2] && colors[0] !== null;
+                }
+            }
+
+            async removeMatches() {
+                const matches = this.findMatches();
+                if (!matches) return;
+                
+                matches.forEach(index => {
+                    this.board[index] = null;
+                    this.candyTypes[index] = null;
+                    const candy = this.grid.children[index];
+                    candy.style.backgroundColor = 'transparent';
+                    candy.classList.remove('special');
+                });
+                
+                return new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            async dropCandies() {
+                let moved;
+                do {
+                    moved = false;
+                    for (let i = this.board.length - 1; i >= this.width; i--) {
+                        if (this.board[i] === null && this.board[i - this.width] !== null) {
+                            // Rengi taşı
+                            this.board[i] = this.board[i - this.width];
+                            this.board[i - this.width] = null;
+                            
+                            // Tipi taşı
+                            this.candyTypes[i] = this.candyTypes[i - this.width];
+                            this.candyTypes[i - this.width] = null;
+                            
+                            const candy = this.grid.children[i];
+                            const upperCandy = this.grid.children[i - this.width];
+                            
+                            candy.style.backgroundColor = upperCandy.style.backgroundColor;
+                            candy.classList.toggle('special', this.candyTypes[i] === 'special');
+                            
+                            upperCandy.style.backgroundColor = 'transparent';
+                            upperCandy.classList.remove('special');
+                            
+                            moved = true;
+                        }
+                    }
+                } while (moved);
+                
+                return new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            async fillEmptySpaces() {
+                for (let i = 0; i < this.board.length; i++) {
+                    if (this.board[i] === null) {
+                        const isSpecial = Math.random() < this.specialCandyChance;
+                        let newColor;
+                        
+                        if (isSpecial) {
+                            newColor = this.specialCandyColor;
+                            this.candyTypes[i] = 'special';
+                        } else {
+                            newColor = this.getRandomColor();
+                            this.candyTypes[i] = 'normal';
+                        }
+                        
+                        this.board[i] = newColor;
+                        const candy = this.grid.children[i];
+                        candy.style.backgroundColor = newColor;
+                        candy.classList.toggle('special', isSpecial);
+                    }
+                }
+                
+                return new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            async checkAndFillBoard() {
+                let matched = false;
+                let totalMatched = false;
+                
+                do {
+                    matched = this.findMatches();
+                    if (matched) {
+                        totalMatched = true;
+                        await this.removeMatches();
+                        await this.dropCandies();
+                        await this.fillEmptySpaces();
+                    }
+                } while (matched);
+                
+                return totalMatched;
+            }
+
+           updateScore(points) {
+    this.score += points * this.activeMultiplier;
+    this.scoreElement.textContent = this.score;
+    this.activeMultiplier = 1; // Çarpanı sıfırla
+}
+
+            isValidMove(index1, index2) {
+                const diff = Math.abs(index1 - index2);
+                return (diff === 1 && Math.floor(index1 / this.width) === Math.floor(index2 / this.width)) || 
+                       (diff === this.width);
+            }
+        }
+		
+function handleTreasureBoxClick() {
+    // Çarpan seçenekleri
+    const multipliers = [0.2, 0.5, 1.5, 2, 5, 10, 100, 250];
+    // Rastgele bir çarpan seç
+    const multiplier = multipliers[Math.floor(Math.random() * multipliers.length)];
+    
+    // Oyuna çarpanı kaydet
+    game.activeMultiplier = multiplier;
+    
+    // Çarpan mesajını göster
+    const multiplierMessage = document.getElementById('multiplier-message');
+    multiplierMessage.style.display = 'block';
+    multiplierMessage.innerText = `X${multiplier}`;
+    
+    // 2 saniye sonra mesajı gizle
+    setTimeout(() => {
+        multiplierMessage.style.display = 'none';
+    }, 2000);
+}
+// Çarpan sandığı fonksiyonu
+document.getElementById('multiplier-box').addEventListener('click', () => {
+    // Çarpan seçenekleri ve ihtimalleri
+    const multipliers = [
+        { multiplier: 0.2, chance: 10 }, // %10 ihtimalle 0.2
+        { multiplier: 0.5, chance: 20 }, // %20 ihtimalle 0.5
+        { multiplier: 1.5, chance: 15 }, // %15 ihtimalle 1.5
+        { multiplier: 2, chance: 15 },   // %15 ihtimalle 2
+        { multiplier: 5, chance: 10 },   // %10 ihtimalle 5
+        { multiplier: 10, chance: 5 },   // %5 ihtimalle 10
+        { multiplier: 100, chance: 10 }, // %10 ihtimalle 100
+        { multiplier: 250, chance: 5 }   // %5 ihtimalle 250
+    ];
+
+    // Rastgele bir çarpan seçmek için
+    let random = Math.random() * 100;
+    let selectedMultiplier = 1;
+
+    // Çarpan ve chance üzerinden seçim
+    for (let item of multipliers) {
+        if (random < item.chance) {
+            selectedMultiplier = item.multiplier;
+            break;
+        }
+        random -= item.chance;
+    }
+
+    // Çarpanı oyuna kaydet
+    game.activeMultiplier = selectedMultiplier;
+
+    // Çarpan mesajını göster
+    const multiplierMessage = document.getElementById('multiplier-message');
+    multiplierMessage.style.display = 'block';
+    multiplierMessage.innerText = `X${selectedMultiplier}`;
+
+    // 2 saniye sonra mesajı gizle
+    setTimeout(() => {
+        multiplierMessage.style.display = 'none';
+    }, 2000);
+});
+
+
+// Şans sandığı fonksiyonu
+function handleTreasureBoxClick() {
+    // 0 ile 5000 arasında rastgele bir sayı üret
+    const prize = Math.floor(Math.random() * 5001);
+    // Skoru güncelle
+    game.updateScore(prize);
+    // Şans sandığını gizle
+    document.getElementById('treasure-box').classList.add('hidden');
+}
+// Çarpan sandığı fonksiyonu
+
+
+
+// Şans sandığına tıklama olayı
+document.getElementById('treasure-box').addEventListener('click', handleTreasureBoxClick);
+document.getElementById('multiplier-box').addEventListener('click', () => game.handleMultiplierBoxClick());
+
+        // Oyunu başlat
+		
+        const game = new CandyCrushGame();
+    </script>
+</body>
+</html>

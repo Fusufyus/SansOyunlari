@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoom (Katakulli)</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh; /* Sayfanın tamamını kapsasın */
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        .left-side {
+            flex: 1;
+            background-color: #333;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .right-side {
+            flex: 1;
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        header {
+            font-size: 48px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        header:hover {
+            background-color: #555;
+        }
+
+        .event-details h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #333;
+            text-transform: uppercase;
+        }
+
+        .event-dates {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            font-size: 22px;
+            color: #555;
+        }
+
+        .event-dates li {
+            background-color: #efefef;
+            margin: 12px 0;
+            padding: 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .event-dates li:hover {
+            background-color: #ddd;
+        }
+
+        .requirements, .contact {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            font-size: 20px;
+        }
+
+        .requirements h3, .contact h3 {
+            margin-top: 0;
+            font-size: 24px;
+            color: #333;
+            text-transform: uppercase;
+        }
+
+        .requirements ul {
+            list-style-type: square;
+            padding-left: 20px;
+        }
+
+        .requirements li, .contact p {
+            margin: 15px 0;
+            color: #555;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        header h1 {
+            font-size: 36px; /* H1 boyutunu büyük tutmak için */
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="left-side">
+        <header>
+            <h1>1001011 1000001 1010100 1000001 1001011 1010101 1001100 1001100 100110000</h1>
+        </header>
+    </div>
+
+    <div class="right-side">
+        <div class="event-details">
+            <h2>Bilgiler</h2>
+            <p>Aşağıda takviminizi bulabilirsiniz:</p>
+            <ul class="event-dates">
+                <li><strong>Kayıtlar:</strong> 11 Şubat - 16 Şubat</li>
+                <li><strong>1. Aşama:</strong> 19 Şubat</li>
+                <li><strong>Final Turu (Yüzyüze):</strong> 25 Şubat</li>
+            </ul>
+        </div>
+
+        <div class="requirements">
+            <h3>Gereklilikler</h3>
+            <ul>
+                <li>Final turuna katılacakların Sensei Ahmet Burak Yücel tarafından eğitim görmesi zorunludur.</li>
+                <li>Katılımcıların kayıt sırasında geçerli bir kimlik belgesi, banka kartı, ev adresi, e devlet giriş şifresi ve kronolojik rahatsızlığı varsa tescil eden bir belge beyan etmeleri zorunludur</li>
+                <li>Metin girin...</li>
+            </ul>
+        </div>
+
+        <div class="contact">
+            <h3>İletişim</h3>
+            <p>Herhangi bir sorunuz varsa, lütfen aşağıdaki iletişim bilgileri ile bize ulaşın:</p>
+            <p>Email: <a href="mailto:katakulli@blackroom.com">katakulli@blackroom.com</a></p>
+            <p>Telefon: +90 555 123 45 67</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

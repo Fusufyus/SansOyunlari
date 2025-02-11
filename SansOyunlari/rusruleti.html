@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rus Ruleti Oyunu</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+    /* Temel stil ayarları */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #222;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 3em;
+      color: #ff6347;
+      margin-bottom: 40px;
+      background: linear-gradient(45deg, #ff6347, #ffcc00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 20px auto;
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 2px solid #ff6347;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 15px rgba(255, 99, 71, 0.5);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    #resultMessage {
+      font-size: 2em;
+      margin: 30px 0;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(255, 99, 71, 0.7);
+      animation: glow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0% { text-shadow: 0 0 10px rgba(255, 99, 71, 0.7); }
+      50% { text-shadow: 0 0 20px rgba(255, 99, 71, 1); }
+      100% { text-shadow: 0 0 10px rgba(255, 99, 71, 0.7); }
+    }
+
+    /* Durum renkleri */
+    .game-over {
+      color: #ff0000;
+      text-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+    }
+
+    .win {
+      color: #00ff00;
+      text-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Rus Ruleti</h1>
+  
+  <div class="container">
+    <p id="resultMessage">Oyuna Başlamak İçin Tıkla!</p>
+    <button id="playButton">Tetiği Çek!</button>
+  </div>
+
+  <script>
+    const resultMessage = document.getElementById("resultMessage");
+    const playButton = document.getElementById("playButton");
+
+    // Rus ruleti oyununun silah mekanizması
+    function playGame() {
+      // Rus ruletinde 6 odak var, bunlardan biri mermi içeriyor
+      const gunChamber = [false, false, false, false, false, true]; // 1 mermi, 5 boş kovan
+      const randomIndex = Math.floor(Math.random() * gunChamber.length); // Rastgele bir kovan seç
+
+      // Tetiği çektiğinde merminin var olup olmadığını kontrol et
+      if (gunChamber[randomIndex]) {
+        resultMessage.innerText = "BANG! Senin için son!\nGAME OVER!";
+        resultMessage.classList.add('game-over');
+        playButton.disabled = true;
+      } else {
+        resultMessage.innerText = "Şanslısın! Bir tur daha devam et!";
+        resultMessage.classList.remove('game-over');
+        resultMessage.classList.add('win');
+      }
+    }
+
+    // Oyun başladığında tetiği çek
+    playButton.addEventListener("click", playGame);
+  </script>
+
+</body>
+</html>

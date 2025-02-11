@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CS:GO Kasa Açma Simulasyonu</title>
+    <style>
+        body {
+            background: #1b2838;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 800px;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+            background: #2a475e;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+.items-container {
+    display: flex;
+    position: absolute;
+    left: 0;
+    transition: left 10s ease-out; /* Başlangıç hızlı, bitişte yavaş */
+}
+
+
+        .item {
+            width: 150px;
+            height: 150px;
+            margin: 25px 10px;
+            background: #4b6b8c;
+            border-radius: 3px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item img {
+            width: 120px;
+            height: 90px;
+            object-fit: cover;
+        }
+
+        .item .name {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+            padding: 0 5px;
+        }
+
+        .marker {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 200px;
+            background: #ffd700;
+            z-index: 2;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #66c0f4;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #4b8bb3;
+        }
+
+        .rare { 
+            border: 2px solid #eb4b4b;
+        }
+        
+        .mythical { 
+            border: 2px solid #8847ff;
+        }
+        
+        .legendary { 
+            border: 2px solid #ffd700;
+            animation: glow 2s infinite;
+            box-shadow: 0 0 10px #ffd700;
+            background: linear-gradient(45deg, #2a475e, #4b6b8c);
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px #ffd700; }
+            50% { box-shadow: 0 0 20px #ffd700, 0 0 30px #ff8c00; }
+            100% { box-shadow: 0 0 10px #ffd700; }
+        }
+
+        .fantastic {
+            border: 2px solid #ff8c00;
+            animation: fantastic-glow 2s infinite;
+            box-shadow: 0 0 8px #ff8c00;
+        }
+
+        @keyframes fantastic-glow {
+            0% { box-shadow: 0 0 8px #ff8c00; }
+            50% { box-shadow: 0 0 15px #ff8c00; }
+            100% { box-shadow: 0 0 8px #ff8c00; }
+        }
+
+        .win-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2a475e;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .legendary-win {
+            animation: legendary-reveal 0.5s;
+            background: linear-gradient(45deg, #2a475e, #4b6b8c);
+            box-shadow: 0 0 30px #ffd700;
+        }
+
+        @keyframes legendary-reveal {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .inventory {
+            width: 800px;
+            background: #2a475e;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .inventory-item {
+            background: #4b6b8c;
+            padding: 10px;
+            border-radius: 3px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="marker"></div>
+        <div class="items-container" id="itemsContainer"></div>
+    </div>
+    <button onclick="spinCase()">Kasa Aç</button>
+
+    <div class="win-popup" id="winPopup">
+        <h2>Tebrikler!</h2>
+        <div id="winItem"></div>
+        <button onclick="closePopup()">Tamam</button>
+    </div>
+
+    <div class="inventory">
+        <h2>Envanter</h2>
+        <div class="inventory-grid" id="inventoryGrid"></div>
+    </div>
+
+    <script>
+     const items = [
+        { name: "Desert Eagle | Blaze", rarity: "rare", img: "/api/placeholder/120/90" },
+        { name: "Glock-18 | Fade", rarity: "rare", img: "/api/placeholder/120/90" },
+        { name: "USP-S | Neo-Noir", rarity: "rare", img: "/api/placeholder/120/90" },
+        { name: "AK-47 | Redline", rarity: "rare", img: "/api/placeholder/120/90" },
+        { name: "M4A4 | Cyber Security", rarity: "rare", img: "/api/placeholder/120/90" },
+        { name: "AK-47 | Asiimov", rarity: "mythical", img: "/api/placeholder/120/90" },
+        { name: "USP-S | Kill Confirmed", rarity: "mythical", img: "/api/placeholder/120/90" },
+        { name: "AWP | Neo-Noir", rarity: "mythical", img: "/api/placeholder/120/90" },
+        { name: "M4A4 | The Emperor", rarity: "fantastic", img: "/api/placeholder/120/90" },
+        { name: "AK-47 | Wild Lotus", rarity: "fantastic", img: "/api/placeholder/120/90" },
+        { name: "Desert Eagle | Printstream", rarity: "fantastic", img: "/api/placeholder/120/90" },
+        { name: "M4A4 | Howl", rarity: "legendary", img: "/api/placeholder/120/90" },
+        { name: "AWP | Dragon Lore", rarity: "legendary", img: "/api/placeholder/120/90" },
+        { name: "Karambit | Fade", rarity: "legendary", img: "/api/placeholder/120/90" }
+    ];
+
+    let isSpinning = false;
+    let inventory = [];
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function createItemElement(item) {
+        return `
+            <div class="item ${item.rarity}">
+                <img src="${item.img}" alt="${item.name}">
+                <div class="name">${item.name}</div>
+            </div>
+        `;
+    }
+
+    function populateItems() {
+        const container = document.getElementById('itemsContainer');
+        let shuffledItems = shuffleArray([...items]);
+        const allItems = [...shuffledItems, ...shuffledItems, ...shuffledItems, ...shuffledItems];
+        container.innerHTML = allItems.map(item => createItemElement(item)).join('');
+        container.style.transition = 'none';
+        container.style.left = '0px';
+    }
+
+    function spinCase() {
+        if (isSpinning) return;
+        isSpinning = true;
+
+        const container = document.getElementById('itemsContainer');
+        container.style.transition = 'left 10s cubic-bezier(0.25, 0.1, 0.25, 1)';  // Daha uzun süreli kayma
+
+        const itemWidth = 170; // item genişliği + margin
+        const centerPosition = Math.floor(window.innerWidth / 2);
+        const containerRect = container.getBoundingClientRect();
+        const markerPosition = centerPosition - containerRect.left;
+
+        const rand = Math.random() * 100;
+        let wonItem;
+
+        if (rand < 55) {
+            const rareItems = items.filter(item => item.rarity === "rare");
+            wonItem = rareItems[Math.floor(Math.random() * rareItems.length)];
+        } else if (rand < 77) {
+            const mythicalItems = items.filter(item => item.rarity === "mythical");
+            wonItem = mythicalItems[Math.floor(Math.random() * mythicalItems.length)];
+        } else if (rand < 95) {
+            const fantasticItems = items.filter(item => item.rarity === "fantastic");
+            wonItem = fantasticItems[Math.floor(Math.random() * fantasticItems.length)];
+        } else {
+            const legendaryItems = items.filter(item => item.rarity === "legendary");
+            wonItem = legendaryItems[Math.floor(Math.random() * legendaryItems.length)];
+        }
+
+        const itemElements = document.querySelectorAll('.item');
+        let targetIndex;
+        for (let i = 0; i < itemElements.length; i++) {
+            if (itemElements[i].querySelector('.name').textContent === wonItem.name) {
+                const itemPosition = i * itemWidth;
+                if (itemPosition > Math.abs(parseInt(container.style.left || 0)) + markerPosition) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+        }
+
+        const finalPosition = -(targetIndex * itemWidth - markerPosition + itemWidth / 2);
+        container.style.left = finalPosition + 'px';
+
+        setTimeout(() => {
+            showWinPopup(wonItem);
+            addToInventory(wonItem);
+            isSpinning = false;
+            populateItems();
+        }, 10000);  // Süreyi 10 saniye yaparak daha uzun kayma sağladık
+    }
+
+    function showWinPopup(item) {
+        const popup = document.getElementById('winPopup');
+        const winItem = document.getElementById('winItem');
+        winItem.innerHTML = createItemElement(item);
+        popup.style.display = 'block';
+
+        if (item.rarity === 'legendary') {
+            popup.classList.add('legendary-win');
+        } else {
+            popup.classList.remove('legendary-win');
+        }
+    }
+
+    function closePopup() {
+        const popup = document.getElementById('winPopup');
+        popup.style.display = 'none';
+    }
+
+    function addToInventory(item) {
+        inventory.push(item);
+        inventory = shuffleArray([...inventory]);
+        updateInventoryDisplay();
+    }
+
+    function updateInventoryDisplay() {
+        const grid = document.getElementById('inventoryGrid');
+        grid.innerHTML = inventory.map(item => `
+            <div class="inventory-item ${item.rarity}">
+                <img src="${item.img}" alt="${item.name}" style="width: 100px; height: 75px;">
+                <div class="name">${item.name}</div>
+            </div>
+        `).join('');
+    }
+
+    populateItems();
+    </script>
+</body>
+</html>
