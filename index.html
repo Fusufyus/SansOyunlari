@@ -7,6 +7,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
 
+        /* Mevcut stiller aynı kalıyor */
         body {
             background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             font-family: 'Montserrat', sans-serif;
@@ -20,6 +21,7 @@
             box-sizing: border-box;
         }
 
+        /* Diğer mevcut stiller... */
         h1 {
             color: white;
             text-transform: uppercase;
@@ -67,6 +69,39 @@
         .turquoise { background: linear-gradient(135deg, #20e3b2, #29ffc6); }
         .green { background: linear-gradient(135deg, #11998e, #38ef7d); }
 
+        /* Yeni eklenen güncelleme notları stili */
+        .version-notes {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            max-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .version-notes h2 {
+            color: #6a11cb;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .version-notes ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .version-notes li {
+            margin-bottom: 10px;
+        }
+
+        /* Diğer mevcut stiller aynı kalıyor */
         .info-btn {
             position: fixed;
             bottom: 15px;
@@ -116,6 +151,24 @@
 </head>
 <body>
     <div class="back-btn" onclick="window.history.back()">←</div>
+    
+    <!-- Yeni eklenen güncelleme notları bölümü -->
+    <div class="version-notes">
+        <h2>Sürüm 1.1.2</h2>
+        <h3>GÜNCELLEME NOTLARI</h3>
+        <ul>
+            <li>Kasa açma oyunu eklendi!
+                <br>Bu yeni oyun modunda istediğiniz gibi kasa açabilir ve çıkardığınız skinleri envanterinize ekleyebilirsiniz!
+                <br>Normal Skin=%56
+                <br>Rare Skin=%22
+                <br>Fantastic Skin=%12
+                <br>Legendary Skin=%5
+            </li>
+            <li>Contact sekmesi güncellendi!</li>
+            <li>Güncellemeler kısmı eklendi!</li>
+        </ul>
+    </div>
+
     <h1>BİR NUMARALI KAPSAMLI ŞANS OYUNLARI SİTESİ</h1>
     <div class="button-container">
         <div class="button blue" onclick="window.open('sweet.html', '_blank')">Sweet Fonanda</div>
