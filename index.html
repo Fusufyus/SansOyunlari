@@ -7,7 +7,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
 
-        /* Mevcut stiller aynı kalıyor */
         body {
             background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             font-family: 'Montserrat', sans-serif;
@@ -21,7 +20,64 @@
             box-sizing: border-box;
         }
 
-        /* Diğer mevcut stiller... */
+        /* Güncelleme notları butonu ve paneli */
+        .update-btn {
+            position: fixed;
+            top: 15px;
+            right: 80px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #6a11cb;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .update-btn:hover {
+            transform: scale(1.05);
+            background: #f0f0f0;
+        }
+
+        .update-panel {
+            position: fixed;
+            top: -400px; /* Başlangıçta gizli */
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            width: 80%;
+            max-width: 600px;
+            z-index: 999;
+            transition: top 0.5s ease;
+        }
+
+        .update-panel.active {
+            top: 70px; /* Açılınca görünecek pozisyon */
+        }
+
+        .update-panel h2 {
+            color: #6a11cb;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .update-panel ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #333;
+        }
+
+        .update-panel li {
+            margin-bottom: 10px;
+        }
+
+        /* Mevcut stiller */
         h1 {
             color: white;
             text-transform: uppercase;
@@ -69,39 +125,6 @@
         .turquoise { background: linear-gradient(135deg, #20e3b2, #29ffc6); }
         .green { background: linear-gradient(135deg, #11998e, #38ef7d); }
 
-        /* Yeni eklenen güncelleme notları stili */
-        .version-notes {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            max-width: 300px;
-            max-height: 400px;
-            overflow-y: auto;
-            color: #333;
-            font-size: 14px;
-        }
-
-        .version-notes h2 {
-            color: #6a11cb;
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .version-notes ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-
-        .version-notes li {
-            margin-bottom: 10px;
-        }
-
-        /* Diğer mevcut stiller aynı kalıyor */
         .info-btn {
             position: fixed;
             bottom: 15px;
@@ -152,8 +175,9 @@
 <body>
     <div class="back-btn" onclick="window.history.back()">←</div>
     
-    <!-- Yeni eklenen güncelleme notları bölümü -->
-    <div class="version-notes">
+    <!-- Güncelleme butonu ve paneli -->
+    <div class="update-btn" onclick="toggleUpdatePanel()">Güncellemeler</div>
+    <div class="update-panel" id="updatePanel">
         <h2>Sürüm 1.1.2</h2>
         <h3>GÜNCELLEME NOTLARI</h3>
         <ul>
@@ -189,5 +213,22 @@
         <div class="button green" onclick="window.open('game_170.html', '_blank')">Çok Yakında...</div>
     </div>
     <div class="info-btn" onclick="window.open('contact.html', '_blank')">?</div>
+
+    <script>
+        function toggleUpdatePanel() {
+            const panel = document.getElementById('updatePanel');
+            panel.classList.toggle('active');
+        }
+
+        // Panelin dışına tıklandığında kapanması için
+        document.addEventListener('click', function(event) {
+            const panel = document.getElementById('updatePanel');
+            const updateBtn = document.querySelector('.update-btn');
+            
+            if (!panel.contains(event.target) && !updateBtn.contains(event.target)) {
+                panel.classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html>
